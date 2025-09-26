@@ -1,22 +1,47 @@
 import pandas as pd
-import os
-from src.helper import SETTINGS, OUT_PATH
+import os, requests
+from src.helper import SETTINGS, OUT_PATH, DOWNLOAD_FOLDER
 from src import log
 
 
-def load_income_status() -> pd.DataFrame:
-    log.log("loading income statuses into memory...")
+download_url = "https://ddh-openapi.worldbank.org/resources/DR0095334/download"
 
-    path = SETTINGS["wb_path"]
-    path = os.path.join(path, "OGHIST_2025_07_01.xlsx")
+
+def download_income_status() -> str:
+    # no need to login for world bank
+
+    with requests.Session() as s:
+
+        # download content
+        log.log("downloading .xlxs from the WBLG database...")
+        r = s.get(download_url, timeout=60)
+        r.raise_for_status()
+        if not r.content:
+            log.error("could not download .xlsx content from the WBLG")
+            raise RuntimeError()
+
+        # make sure output directory exists
+        path = os.path.join(DOWNLOAD_FOLDER, "WB")
+        os.makedirs(path, exist_ok=True)
+
+        # IMPORTANT: for world bank, path include file name.xlxs
+        path = os.path.join(path, "WorldBank_Country_LendingGroups.xlsx")
+        with open(path, "wb") as f:
+            f.write(r.content)
+    
+        log.log("successfully downloaded .xlxs from the WBLG")
+
+    return path
+
+
+def load_income_status(path: str) -> pd.DataFrame:
     df = pd.read_excel(path, sheet_name="Country Analytical History")
   
+    log.log("loaded the WBLG data into memory")
     return df
 
 
 def format_income_status(df: pd.DataFrame) -> pd.DataFrame:
-    log.log("formatting income statuses...")
-
     df = df.iloc[4:228].reset_index(drop=True) # grab subset of just data we want
     df.drop(df.columns[1], axis=1, inplace=True) # drop country column, already hav iso3
 
@@ -34,15 +59,17 @@ def format_income_status(df: pd.DataFrame) -> pd.DataFrame:
     # sort to country is completed before moving to next
     df_long = df_long.sort_values(by=["ISO3", "Year"]).reset_index(drop=True)
 
+    log.log("formated the income status of countries")
     return df_long
 
 
 def generate_income_status_df() -> pd.DataFrame:
-    raw_income_status_df = load_income_status()
+    path = download_income_status()
+    raw_income_status_df = load_income_status(path)
     income_status_df = format_income_status(raw_income_status_df)
 
     path = os.path.join(OUT_PATH, "income_status.csv")
     income_status_df.to_csv(path, index=False)
 
-    log.log("formated income statuses successfully, exported as: " + path)
+    log.log("successfully generated the income status of countries: " + path)
     return income_status_df

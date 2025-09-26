@@ -1,9 +1,15 @@
 from datetime import datetime
 import json5, os
-import pandas as pd
+from dotenv import load_dotenv
 
- 
+load_dotenv()
+EMAIL = os.environ.get("EMAIL")
+PASSWORD = os.environ.get("PASSWORD")
+
 SETTINGS_FILE = "settings.json5"
+
+DOWNLOAD_FOLDER = "data/raw"
+OUTPUT_FOLDER = "data/processed"
 
 
 # timestamp functions
@@ -19,7 +25,7 @@ with open(SETTINGS_FILE, "r") as f:
 # find next avaible output data folder
 i = 1
 while True:
-    candidate = os.path.join(SETTINGS["output_folder"], f"data{i}")
+    candidate = os.path.join(OUTPUT_FOLDER, f"data{i}")
     if os.path.isdir(candidate):
         i += 1
     else:

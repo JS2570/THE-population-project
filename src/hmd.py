@@ -1,22 +1,62 @@
-import os
+import os, requests, zipfile, io
 import pandas as pd
-from src.helper import SETTINGS, OUT_PATH
+from src.helper import SETTINGS, OUT_PATH, EMAIL, PASSWORD, DOWNLOAD_FOLDER
 from src import log
+from bs4 import BeautifulSoup
+
+
+login_url = "https://www.mortality.org/Account/Login"
+download_url = "https://www.mortality.org/File/GetDocument/hmd.v6/zip/by_statistic/lt_female.zip"
+
+
+# downloads the hmd
+def download_hmd() -> str:
+    # run session to persist with cookies
+    with requests.Session() as s:
+        # get anti-forgery token
+        r = s.get(login_url, timeout=60)
+        r.raise_for_status()
+        soup = BeautifulSoup(r.text, "html.parser")
+        token = soup.find("input", {"name": "__RequestVerificationToken"}).get("value")
+        if not token:
+            log.error("could not fetch anti-forgery token for the HMD")
+            raise RuntimeError()
+        log.log("fetched anti-forgery token for the HMD")
+
+        # post login credentials and token
+        payload = {
+        "Email": EMAIL,
+        "Password": PASSWORD,
+        "__RequestVerificationToken": token
+        }
+
+        r = s.post(login_url, data=payload, timeout=60)
+        r.raise_for_status()
+        if "Logout" not in r.text and "Log out" not in r.text:
+            log.error("failed to login to the HMD")
+            raise RuntimeError()
+        log.log("successfully logged in to the HMD")
+
+        # download content
+        log.log("downloading .zip for HMD...")
+        r = s.get(download_url, timeout=60)
+        r.raise_for_status()
+        if not r.content:
+            log.error("could not download .zip content from the HMD")
+            raise RuntimeError()
+        log.log("successfully downloaded .zip from the HMD")
+
+        # extract .zip file to output directory
+        with zipfile.ZipFile(io.BytesIO(r.content)) as file:
+            path = os.path.join(DOWNLOAD_FOLDER, "HMD")
+            file.extractall(path)
+        log.log("HMD .zip successfully extracted to: " + path)
+
+        return path
 
 
 # get specified path for hmd and load into dataframe
-def load_hmd() -> pd.DataFrame:
-    log.log("loading HMD into memory...")
-
-    path = SETTINGS["hmd_path"]
-
-    # find sex file
-    sex = SETTINGS["hmd_sex"]
-    dirs = [f for f in os.listdir(path) if f.endswith(f"_{sex}")]
-    if len(dirs) != 1: log.error(f"HMD directories are indistinguishable or not found", path)
-    path = os.path.join(path, dirs[0])
-    
-    # TODO make it possible to select age class through settings
+def load_hmd(path: str) -> pd.DataFrame:
     value = "1x1"
     dirs = [f for f in os.listdir(path) if f.endswith(f"_{value}")]
     if len(dirs) != 1: log.error("HMD age class directories are indistinguishable or not found", path)
@@ -33,11 +73,12 @@ def load_hmd() -> pd.DataFrame:
         engine="python",
         skiprows=2)
 
+    log.log("loaded the HMD into memory")
     return df
 
 
 def format_hmd(df: pd.DataFrame) -> pd.DataFrame:
-    log.log("formatting HMD...")
+    # TODO possibly implement formating for age clases
 
     hmd_variables = ["PopName", "Year", "Age", "lx"] # alter accordingly to variables found in HMD life tables
     df = df[hmd_variables].copy() # filter for selected columns
@@ -53,15 +94,17 @@ def format_hmd(df: pd.DataFrame) -> pd.DataFrame:
         df["lx"] = df["lx"] / df["lx0"]
         df.drop(columns="lx0", inplace=True)
 
+    log.log("formatted the HMD")
     return df
 
 
 def generate_hmd_df() -> pd.DataFrame:
-    raw_hmd_df = load_hmd()
+    path = download_hmd()
+    raw_hmd_df = load_hmd(path)
     hmd_df = format_hmd(raw_hmd_df)
 
     path = os.path.join(OUT_PATH, "hmd.csv")
     hmd_df.to_csv(path, index=False)
 
-    log.log("formated HMD successfully, exported as: " + path)
+    log.log("successfully generated the HMD: " + path)
     return hmd_df

@@ -8,8 +8,6 @@ from src import log
 
 
 def merge_hmd_hfd_df(hmd_df: pd.DataFrame, hfd_df: pd.DataFrame):
-    log.log("merging data from HMD and HFD...")
-
     # filter only common country, year pairs
     common_df = pd.merge(
         hmd_df[["ISO3", "Year"]].drop_duplicates(),
@@ -33,6 +31,7 @@ def merge_hmd_hfd_df(hmd_df: pd.DataFrame, hfd_df: pd.DataFrame):
     df = grid.merge(hmd_df, on=["ISO3", "Year", "Age"], how="left")
     df = df.merge(hfd_df, on=["ISO3", "Year", "Age"], how="left")
 
+    log.log("merged the HMD and HFD tables")
     return df
 
 
@@ -48,4 +47,4 @@ def generate_life_table():
     path = os.path.join(OUT_PATH, "life_table.csv")
     hmd_hfd_df.to_csv(path, index=False)
 
-    log.log("mereged HMD and HFD dataset successfully, exported as: " + path)
+    log.log("succesfully generated the merged life table: " + path)
