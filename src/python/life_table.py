@@ -34,7 +34,7 @@ def merge_hmd_hfd_df(hmd_df: pd.DataFrame, hfd_df: pd.DataFrame):
     return df
 
 
-def generate_life_table():
+def generate_life_table() -> str:
     # generate formated data from HMD and HFD
     hmd_df = hmd.generate_hmd_df()
     hfd_df = hfd.generate_hfd_df()
@@ -47,3 +47,4 @@ def generate_life_table():
     hmd_hfd_df.to_csv(path, index=False)
 
     log.log("succesfully generated the merged life table: " + path)
+    return path

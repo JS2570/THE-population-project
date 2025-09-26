@@ -11,6 +11,8 @@ SETTINGS_FILE = "settings.json5"
 DOWNLOAD_FOLDER = "data/raw"
 OUTPUT_FOLDER = "data/processed"
 
+R_PATH = "src/R"
+
 
 # timestamp functions
 def get_datetimestamp(): return datetime.now().strftime("%Y-%m-%d %H:%M:%S")

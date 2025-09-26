@@ -63,7 +63,7 @@ def format_income_status(df: pd.DataFrame) -> pd.DataFrame:
     return df_long
 
 
-def generate_income_status_df() -> pd.DataFrame:
+def generate_income_status_df():
     path = download_income_status()
     raw_income_status_df = load_income_status(path)
     income_status_df = format_income_status(raw_income_status_df)
@@ -72,4 +72,4 @@ def generate_income_status_df() -> pd.DataFrame:
     income_status_df.to_csv(path, index=False)
 
     log.log("successfully generated the income status of countries: " + path)
-    return income_status_df
+    return income_status_df, path
