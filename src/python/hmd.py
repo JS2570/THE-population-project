@@ -1,8 +1,8 @@
 import os, requests, zipfile, io
 import pandas as pd
-from src.helper import SETTINGS, OUT_PATH, EMAIL, PASSWORD, DOWNLOAD_FOLDER
-from src import log
 from bs4 import BeautifulSoup
+from src.python.helper import SETTINGS, OUT_PATH, EMAIL, PASSWORD, DOWNLOAD_FOLDER
+from src.python import log
 
 
 login_url = "https://www.mortality.org/Account/Login"

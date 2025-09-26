@@ -1,8 +1,8 @@
 import os, requests, zipfile, io
 import pandas as pd
-from src import log
-from src.helper import OUT_PATH, SETTINGS, DOWNLOAD_FOLDER, EMAIL, PASSWORD
 from bs4 import BeautifulSoup
+from src.python.helper import OUT_PATH, DOWNLOAD_FOLDER, EMAIL, PASSWORD
+from src.python import log
 
 
 login_url = "https://www.humanfertility.org/Account/Login"

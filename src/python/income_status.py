@@ -1,7 +1,7 @@
-import pandas as pd
 import os, requests
-from src.helper import SETTINGS, OUT_PATH, DOWNLOAD_FOLDER
-from src import log
+import pandas as pd
+from src.python.helper import OUT_PATH, DOWNLOAD_FOLDER
+from src.python import log
 
 
 download_url = "https://ddh-openapi.worldbank.org/resources/DR0095334/download"

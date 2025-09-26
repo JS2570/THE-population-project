@@ -1,5 +1,4 @@
-from src import income_status
-from src import log 
+from src.python import income_status
 
 
 def generate_country_table():

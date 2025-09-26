@@ -1,7 +1,5 @@
 {
     "standardise_lx": true,
     "min_age": 0,
-    "max_age": 110, // HMD ranges from 0-110
-
-    "download": true // true: downloads fresh data, false: uses data in in project
+    "max_age": 110 // HMD ranges from 0-110
 }

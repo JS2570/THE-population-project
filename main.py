@@ -1,6 +1,5 @@
-from src import log
-from src.life_table import generate_life_table
-from src.country_table import generate_country_table
+from src.python.life_table import generate_life_table
+from src.python.country_table import generate_country_table
     
     
 if __name__ == "__main__":

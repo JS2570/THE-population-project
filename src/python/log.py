@@ -1,5 +1,5 @@
 import os, sys
-from src.helper import get_datetimestamp, OUT_PATH
+from src.python.helper import get_datetimestamp, OUT_PATH
 
 
 LOG_FILE = "log_file.log"

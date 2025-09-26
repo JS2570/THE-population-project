@@ -17,8 +17,3 @@ make sure email and password are the same for both websites (HMD and HFD)
 
 TODO:
 form metadata
-
-.env file:
-
-EMAIL=
-PASSWORD=

@@ -1,10 +1,9 @@
 # TODO look into finding a way to collapse extra ISO3 codes into (e.g. DEUTNP -> DEU)
 
 import os
-from src import hmd, hfd
 import pandas as pd
-from src.helper import SETTINGS, OUT_PATH
-from src import log
+from src.python import hmd, hfd, log
+from src.python.helper import SETTINGS, OUT_PATH
 
 
 def merge_hmd_hfd_df(hmd_df: pd.DataFrame, hfd_df: pd.DataFrame):

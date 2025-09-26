@@ -1,5 +1,5 @@
+import os, json5
 from datetime import datetime
-import json5, os
 from dotenv import load_dotenv
 
 load_dotenv()
