@@ -1,12 +1,9 @@
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) != 2) {
-  stop("usage: Rscript <script_path.R> <inp_path.csv> <out_path.csv>")
-}
-inp <- args[1]
-out <- args[2]
+if (length(args) != 1) stop("usage: Rscript <script_path.R> <path.csv>")
+path <- args[1]
 
 # read csv
-df <- read.csv(inp, header = TRUE)
+df <- read.csv(path, header = TRUE)
 
 # require these columns
 required <- c("ISO3", "Year", "Age", "lx", "mx")
@@ -16,12 +13,9 @@ if (length(missing) > 0) {
 }
 
 # coerce numeric fields
-df$Age <- as.numeric(df$Age)
-df$lx <- as.numeric(df$lx)
-df$mx <- as.numeric(df$mx)
-
-# sort to ensure age order within each country-year
-df <- df[order(df$ISO3, df$Year, df$Age), ]
+#df$Age <- as.numeric(df$Age)
+#df$lx <- as.numeric(df$lx)
+#df$mx <- as.numeric(df$mx)
 
 # initialise
 n <- nrow(df)
@@ -81,4 +75,4 @@ for (g in groups) {
 }
 
 # write csv
-write.csv(df, out, row.names = FALSE)
+write.csv(df, path, row.names = FALSE)

@@ -6,7 +6,7 @@ from src.python import log
     
 
 life_table_derivatives_R = "src/R/life_table_derivatives.R"
-generation_time_R = "src/R//generation_time.R"
+generation_time_R = "src/R/generation_time.R"
 
 
 def run_r(path: str, *args: str):
@@ -34,6 +34,6 @@ if __name__ == "__main__":
 
     # r analysis
     log.log("=== r pipeline: start ===")
-    run_r(life_table_derivatives_R, life_table_path, life_table_path) # compute fields like dx, sx, qx etc...
-    run_r(generation_time_R, country_table_path, country_table_path) # calculation generation time
+    run_r(life_table_derivatives_R, life_table_path) # compute fields like dx, sx, qx etc...
+    run_r(generation_time_R, life_table_path, country_table_path) # calculation generation time
     log.log("=== r pipeline: done ===")
