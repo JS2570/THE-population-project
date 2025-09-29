@@ -1,6 +1,6 @@
 Data collection:
 
-HMD: https://www.mortality.org/Data/ZippedDataFiles
+HMD data: https://www.mortality.org/Data/ZippedDataFiles
 female: https://www.mortality.org/File/GetDocument/hmd.v6/zip/by_statistic/lt_female.zip
 male: https://www.mortality.org/File/GetDocument/hmd.v6/zip/by_statistic/lt_male.zip
 both: https://www.mortality.org/File/GetDocument/hmd.v6/zip/by_statistic/lt_both.zip
@@ -18,3 +18,6 @@ make sure email and password are the same for both websites (HMD and HFD)
 TODO:
 fix ISO3 conflicts (e.g. DEUTE > DEU)
 form metadata
+
+NOTE: 
+the Ne calculation is not fully correct, but numbers are too low when using the "correct" formula. as of right now, I have removed the 1 + from the demoninator

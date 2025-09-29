@@ -42,9 +42,6 @@ ne_list <- lapply(groups, function(g) {
   data.frame(
     ISO3 = iso,
     Year = year,
-    N1 = N1,
-    numerator = numerator,
-    denominator = denominator,
     Ne = Ne,
     stringsAsFactors = FALSE
   )

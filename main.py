@@ -30,7 +30,7 @@ if __name__ == "__main__":
     # python prep
     log.log("=== python pipeline: start ===")
     life_table_path = generate_life_table()
-    country_table_path = generate_country_table()
+    country_table_path = generate_country_table(life_table_path)
     log.log("=== python pipeline: done ===")
 
     # r analysis
