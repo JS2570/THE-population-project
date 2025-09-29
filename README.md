@@ -1,6 +1,6 @@
 ## Instructions
 
-### Setup 
+### Setup
 
 #### MacOS
 
@@ -15,9 +15,9 @@ pip install -r requirements.txt
 
 ```cmd
 python3 -m venv .venv
-.venv/Scripts/Activate
+.\.venv\Scripts\activate.bat
 
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 Data collection:

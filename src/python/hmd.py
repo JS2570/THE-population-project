@@ -109,8 +109,8 @@ def format_hmd(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def generate_hmd_df() -> pd.DataFrame:
-    if SETTINGS["download"]: download_hmd()
+def generate_hmd_df(download: bool) -> pd.DataFrame:
+    if download: download_hmd()
 
     raw_hmd_df = load_hmd(download_path)
     hmd_df = format_hmd(raw_hmd_df)

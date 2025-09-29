@@ -20,8 +20,8 @@ def format_country_table(income_status_df: pd.DataFrame, life_table_df: pd.DataF
     return df
 
 
-def generate_country_table(life_table_path):
-    income_status_df, path = income_status.generate_income_status_df()
+def generate_country_table(life_table_path, download: bool):
+    income_status_df, path = income_status.generate_income_status_df(download)
 
     country_table_df = income_status_df # TODO temp
 

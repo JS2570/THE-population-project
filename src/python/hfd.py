@@ -87,8 +87,8 @@ def format_hfd(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def generate_hfd_df():
-    if SETTINGS["download"]: download_hfd()
+def generate_hfd_df(download: bool):
+    if download: download_hfd()
 
     raw_hfd_df = load_hfd(download_path)
     hfd_df = format_hfd(raw_hfd_df)

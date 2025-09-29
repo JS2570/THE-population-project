@@ -1,7 +1,7 @@
-import os, subprocess
+import os, subprocess, argparse
 from src.python.life_table import generate_life_table
 from src.python.country_table import generate_country_table
-from src.python.helper import DOWNLOAD_FOLDER as raw, OUTPUT_FOLDER as processed, R_PATH
+from src.python.helper import DOWNLOAD_FOLDER as raw, OUTPUT_FOLDER as processed, R_PATH, SETTINGS
 from src.python import log  
     
 
@@ -11,9 +11,15 @@ ne_felsenstein_R = "src/R/ne_felsenstein.R"
 
 
 def run_r(path: str, *args: str):
-    cmd = ["Rscript", path, *map(str, args)]
-    log.log(f"running R: {path}")
-    res = subprocess.run(cmd,capture_output=True, text=True)
+    try:
+        cmd = ["Rscript", path, *map(str, args)]
+        res = subprocess.run(cmd,capture_output=True, text=True)
+        log.log(f"ran R: {path}")
+    except:
+        cmd = [fr"C:\Program Files\R\{SETTINGS['r_version']}\bin\Rscript", "--vanilla", path, *map(str, args)]
+        res = subprocess.run(cmd, capture_output=True, text=True, shell=True)
+        log.log(f"ran R: {path}")
+    
     if res.stdout:
         log.log(res.stdout.strip())
     if res.stderr: # apparently some R packages write informative messages to stderr, so logging them to log.log, not to log.error
@@ -23,14 +29,18 @@ def run_r(path: str, *args: str):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--download", action="store_true", help="Download data")
+    args = parser.parse_args()
+
     # make sure folders exist
     for p in (raw, processed, "outputs"):
         os.makedirs(p, exist_ok=True)
 
     # python prep
     log.log("=== python pipeline: start ===")
-    life_table_path = generate_life_table()
-    country_table_path = generate_country_table(life_table_path)
+    life_table_path = generate_life_table(args.download)
+    country_table_path = generate_country_table(life_table_path, args.download)
     log.log("=== python pipeline: done ===")
 
     # r analysis

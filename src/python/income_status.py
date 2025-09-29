@@ -62,8 +62,8 @@ def format_income_status(df: pd.DataFrame) -> pd.DataFrame:
     return df_long
 
 
-def generate_income_status_df():
-    if SETTINGS["download"]: download_income_status()
+def generate_income_status_df(download: bool):
+    if download: download_income_status()
 
     raw_income_status_df = load_income_status(download_path)
     income_status_df = format_income_status(raw_income_status_df)

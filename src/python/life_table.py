@@ -34,10 +34,10 @@ def merge_hmd_hfd_df(hmd_df: pd.DataFrame, hfd_df: pd.DataFrame):
     return df
 
 
-def generate_life_table() -> str:
+def generate_life_table(download: bool) -> str:
     # generate formated data from HMD and HFD
-    hmd_df = hmd.generate_hmd_df()
-    hfd_df = hfd.generate_hfd_df()
+    hmd_df = hmd.generate_hmd_df(download)
+    hfd_df = hfd.generate_hfd_df(download)
 
     # merge data from HMD and HFD
     hmd_hfd_df = merge_hmd_hfd_df(hmd_df, hfd_df)
