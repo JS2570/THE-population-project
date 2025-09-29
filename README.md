@@ -1,9 +1,8 @@
-## Instructions
+# Instructions
 
-### Setup 
+## Setup 
 
-#### MacOS
-
+### MacOS
 ```
 python3 -m venv .venv
 source .venv/bin/activate
@@ -11,8 +10,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-#### Windows
-
+### Windows
 ```
 python3 -m venv .venv
 .venv/Scripts/Activate
@@ -20,21 +18,21 @@ python3 -m venv .venv
 pip install requirements.txt
 ```
 
-### Execution
+## Execution
 
-#### Download and run
+### Download and run
 Primary command to download the databases from the internet, and run the program for formatting and analyses.
 ```
 python3 main.py --download
 ```
 
-#### Run
+### Run
 Default command after data has been downloaded. Code is ran on the previously downloaded data.
 ```
 python3 main.py 
 ```
 
-#### Help
+### Help
 For more help.
 ```
 python3 main.py --help
