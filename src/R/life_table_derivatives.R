@@ -12,11 +12,6 @@ if (length(missing) > 0) {
   stop("missing required columns: ", paste(missing, collapse = ", "))
 }
 
-# coerce numeric fields
-#df$Age <- as.numeric(df$Age)
-#df$lx <- as.numeric(df$lx)
-#df$mx <- as.numeric(df$mx)
-
 # initialise
 n <- nrow(df)
 df$dx <- NA
@@ -29,8 +24,8 @@ groups <- split(seq_len(n), paste(df$ISO3, df$Year), sep=":")
 
 for (g in groups) {
   n <- length(g)
-  lx <- df$lx[g]
-  mx <- df$mx[g]
+  lx <- as.numeric(df$lx[g])
+  mx <- as.numeric(df$mx[g])
   
   dx <- matrix(NA, n-1)
   sx <- matrix(NA, n)
@@ -67,9 +62,9 @@ for (g in groups) {
   df$qx[g] <- qx
   
   # vx
-  for (i in 1:(n-1)) {
+  for (i in 1:n) {
     # vx = q(x + 1)^2 / l(x + 1)^2
-    vx[i] <- qx[i+1]^2 / lx[i+1]^2
+    vx[i] <- qx[i] / lx[i]
   }
   df$vx[g] <- vx
 }

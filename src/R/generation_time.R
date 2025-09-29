@@ -7,18 +7,13 @@ country_table_path <- args[2]
 life <- read.csv(life_table_path, header = TRUE)
 country <- read.csv(country_table_path, header = TRUE)
 
-# coerce numeric fields
-#life$Age <- as.numeric(life$Age)
-#life$lx <- as.numeric(life$lx)
-#life$mx <- as.numeric(life$mx)
-
 # split into (country, year) groups
 groups <- split(seq_len(nrow(life)), interaction(life$ISO3, life$Year, drop = TRUE))
 
 # compute generation time (T) per group
 gen_list <- lapply(groups, function(g) {
-  x <- life$Age[g]
-  px <- life$px[g]
+  x <- as.numeric(life$Age[g])
+  px <- as.numeric(life$px[g])
   
   # Lotka T = sum(x * px) / sum(px)
   numerator <- sum(x * px, na.rm = TRUE)

@@ -16,4 +16,5 @@ historical: https://ddh-openapi.worldbank.org/resources/DR0095334/download
 make sure email and password are the same for both websites (HMD and HFD)
 
 TODO:
+fix ISO3 conflicts (e.g. DEUTE > DEU)
 form metadata
