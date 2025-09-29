@@ -1,8 +1,8 @@
-### Instructions
+## Instructions
 
-## Setup 
+### Setup 
 
-# MacOS
+#### MacOS
 
 ```bash
 python3 -m venv .venv
@@ -11,7 +11,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-# Windows
+#### Windows
 
 ```cmd
 python3 -m venv .venv
