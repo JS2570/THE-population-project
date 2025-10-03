@@ -18,13 +18,13 @@ gen_list <- lapply(groups, function(g) {
   # Lotka T = sum(x * px) / sum(px)
   numerator <- sum(x * px, na.rm = TRUE)
   denominator <- sum(px, na.rm = TRUE)
-  G <- numerator / denominator
+  T <- numerator / denominator
 
   data.frame(
     ISO3 = life$ISO3[g[1]],
     ISO3_suffix = life$ISO3_suffix[g[1]],
     Year = life$Year[g[1]],
-    G = G,
+    T = T,
     stringsAsFactors = FALSE
   )
 })

@@ -22,7 +22,7 @@ ne_list <- lapply(groups, function(g) {
 
   # T from country table for the same ISO3, suffix and year
   match_row <- which(country$ISO3 == iso & country$ISO3_suffix == suffix & country$Year == year)
-  G <- country$G[match_row[1]]
+  T <- country$T[match_row[1]]
 
   lx <- life$lx[g]
   sx <- life$sx[g]
@@ -30,7 +30,7 @@ ne_list <- lapply(groups, function(g) {
   vx <- life$vx[g]
 
   # Ne = (N1 * T) / sum(lx * sx * dx * v(x + 1)^2)
-  numerator <- N1 * G
+  numerator <- N1 * T
 
   # compute terms, keeping only rows where every factor is finite
   i <- seq_len(length(g) - 1L)

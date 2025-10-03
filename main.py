@@ -8,6 +8,9 @@ from src.python import log
 life_table_derivatives_R = "src/R/life_table_derivatives.R"
 generation_time_R = "src/R/generation_time.R"
 ne_felsenstein_R = "src/R/ne_felsenstein.R"
+plots_Ne_T_by_group_R = "src/R/plots_Ne_T_by_group.R"
+
+out_dir = "outputs"
 
 
 def run_r(path: str, *args: str):
@@ -55,7 +58,13 @@ if __name__ == "__main__":
 
     # r analysis
     log.log("=== r pipeline: start ===")
+
+    # generate data
     run_r(life_table_derivatives_R, life_table_path) # compute fields like dx, sx, qx etc...
     run_r(generation_time_R, life_table_path, country_table_path) # calculation generation time
     run_r(ne_felsenstein_R, life_table_path, country_table_path) # calculate Ne according to felsenstein
+
+    # plot data
+    run_r(plots_Ne_T_by_group_R, country_table_path, out_dir)
+
     log.log("=== r pipeline: done ===")
