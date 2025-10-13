@@ -44,13 +44,13 @@ for (g in groups) {
   df$dx[g] <- dx 
   df$sx[g] <- sx
   
-  # px (lxmx)
+  # px = lx x mx (for each age) / sum (lx x mx) (for all ages) ; performed for each age 
   # lxmx = lx * mx
-  px <- lx * mx
-  px_clean <- ifelse(is.na(px), 0, px)
-  R0 <- sum(px_clean)
-  df$px[g] <- px
-  
+  px_raw <- lx * mx #changing name to px_raw so final value can be called px
+  px_clean <- ifelse(is.na(px_raw), 0, px_raw) #stres them for eahc age 
+  R0 <- sum(px_clean) #sum of individual lx mx values
+  px <- px_clean / R0 # diving individual lx x mx product for each age by sum of each lx x mx 
+  df$px[g] <- px 
   # qx
   px[is.na(px)] <- 0 # treat NA as 0 for sum
   n = length(px)

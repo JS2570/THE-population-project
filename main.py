@@ -64,7 +64,21 @@ if __name__ == "__main__":
     run_r(generation_time_R, life_table_path, country_table_path) # calculation generation time
     run_r(ne_felsenstein_R, life_table_path, country_table_path) # calculate Ne according to felsenstein
 
-    # plot data
-    run_r(plots_Ne_T_by_group_R, country_table_path, out_dir)
+    # plot data; had to get rid of run r as r needs to keep running for r shiny
+    
+    os.environ["SHINY_DATA_DIR"] = processed #processed function willtake the most uptodate file; when i start the  r shiny app, tellit the data is inside the outputs folder
+    import webbrowser #using Popen isntead of run; lets Rshiny keep running
+    import time
 
-    log.log("=== r pipeline: done ===")
+    log.log("population project V1.0 starting...")
+    shiny_process =subprocess.Popen(
+        ["Rscript","ShinyPipeline.R"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
+
+    time.sleep(10) #wait for shiny to start
+    webbrowser.open("http://127.0.0.1:7398")
+
+    log.log("== r pipeline: done ==")

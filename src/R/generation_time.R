@@ -11,13 +11,18 @@ country <- read.csv(country_table_path, header = TRUE)
 groups <- split(seq_len(nrow(life)), interaction(life$ISO3, life$ISO3_suffix, life$Year, drop = TRUE))
 
 # compute generation time (T) per group
+# as px was nomralised; px is redifiend here 
 gen_list <- lapply(groups, function(g) {
   x <- as.numeric(life$Age[g])
-  px <- as.numeric(life$px[g])
+  
+# px_raw being redefined as lx * mx
+lx <- as.numeric(life$lx[g])
+mx <- as.numeric(life$mx[g])
+px_raw <- lx * mx
 
   # Lotka T = sum(x * px) / sum(px)
-  numerator <- sum(x * px, na.rm = TRUE)
-  denominator <- sum(px, na.rm = TRUE)
+  numerator <- sum(x * px_raw, na.rm = TRUE)
+  denominator <- sum(px_raw, na.rm = TRUE)
   T <- numerator / denominator
 
   data.frame(
