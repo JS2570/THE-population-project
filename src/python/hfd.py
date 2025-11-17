@@ -74,12 +74,14 @@ def load_hfd(path) -> pd.DataFrame:
 
 def format_hfd(df: pd.DataFrame) -> pd.DataFrame:
     df.rename(columns={"Code": "ISO3", "ASFR": "mx"}, inplace=True)
+    df["ISO3_suffix"] = df["ISO3"].str.slice(3).replace("",pd.NA)
+    df["ISO3"] = df["ISO3"].str.slice(0,3)
     df["Age"] = pd.to_numeric(df["Age"].str.extract(r"(\d+)")[0], errors="coerce") # force age to be numeric, get rid of signs (e.g. +)
 
     # drop first and last row of every group because 12- and 55+
     if SETTINGS["include_edge_data"] == False:
         df = (
-            df.groupby(["ISO3", "Year"], group_keys=False)
+            df.groupby(["ISO3", "ISO3_suffix" "Year"], group_keys=False)
             .apply(lambda g: g.iloc[1:-1])
         )
 

@@ -1,4 +1,5 @@
 import os, subprocess, argparse
+from sys import stderr, stdout
 from src.python.life_table import generate_life_table
 from src.python.country_table import generate_country_table
 from src.python.helper import DOWNLOAD_FOLDER as raw, OUTPUT_FOLDER as processed, R_PATH, SETTINGS
@@ -42,6 +43,12 @@ def run_r(path: str, *args: str):
 
 
 if __name__ == "__main__":
+    #debug
+    import os
+    log.log(f"Python is running from: {os.getcwd()}")
+    log.log(f"ShinyPipeline.R exists here: {os.path.exists('ShinyPipeline.R')}")
+    
+    
     parser = argparse.ArgumentParser()
     parser.add_argument("--download", action="store_true", help="Download data")
     args = parser.parse_args()
@@ -63,10 +70,15 @@ if __name__ == "__main__":
     run_r(life_table_derivatives_R, life_table_path) # compute fields like dx, sx, qx etc...
     run_r(generation_time_R, life_table_path, country_table_path) # calculation generation time
     run_r(ne_felsenstein_R, life_table_path, country_table_path) # calculate Ne according to felsenstein
-
+    run_r("src/R/mx_shape_metrics.R", life_table_path, country_table_path) #calculate mx with skew
     # plot data; had to get rid of run r as r needs to keep running for r shiny
     
-    os.environ["SHINY_DATA_DIR"] = processed #processed function willtake the most uptodate file; when i start the  r shiny app, tellit the data is inside the outputs folder
+    log.log(f"SHINY_DATA_DIR is set to: {processed}")
+
+
+    latest_data_directory = os.path.dirname(life_table_path)
+    os.environ["SHINY_DATA_DIR"] = latest_data_directory
+    log.log(f"SHINY_DATA_DIR is set to: {latest_data_directory}")
     import webbrowser #using Popen isntead of run; lets Rshiny keep running
     import time
 
@@ -75,10 +87,23 @@ if __name__ == "__main__":
         ["Rscript","ShinyPipeline.R"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True
+        text=True,
+        bufsize=1 #buffered line
     )
 
-    time.sleep(10) #wait for shiny to start
-    webbrowser.open("http://127.0.0.1:7398")
+    time.sleep(5)
+   
+    if shiny_process.poll() is not None:
+        log.error(f"Shiny crashed Exit code {shiny_process.returncode}")
+        log.error(f"R stdout: {stdout}")
+        log.error(f"R stderr: {stderr}")
 
-    log.log("== r pipeline: done ==")
+    else:
+        log.log("Shiny process is running!")
+        webbrowser.open("http://127.0.0.1:7398")
+        log.log("Press Ctrl=c in the treminal to stop the app")
+        shiny_process.wait()
+
+log.log("== r pipeline: done ==")
+   
+

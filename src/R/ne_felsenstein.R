@@ -1,58 +1,85 @@
+library(data.table)
+
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) != 2) stop("usage: Rscript <script_path.R> <life_table_path.csv> <country_table_path.csv>")
 life_table_path <- args[1]
 country_table_path <- args[2]
-#when Pythoncalls run(ne,lifetables,country path) both paths become arg[1] and arg[2]
-# read csv
-life <- read.csv(life_table_path, header = TRUE) #setting life as one row per page
-country <- read.csv(country_table_path, header = TRUE) # country one row per counrtry x sex x year ; ISO3 (countrycode)
 
-# split into (country, year) groups
-groups <- split(seq_len(nrow(life)), interaction(life$ISO3, life$ISO3_suffix, life$Year, drop = TRUE))
+# === TIMING: Start ===
+script_start <- Sys.time()
+cat("=== Ne Pipeline Started ===\n")
 
-ne_list <- lapply(groups, function(g) {
-  iso <- life$ISO3[g[1]]
-  suffix <- life$ISO3_suffix[g[1]]
-  year <- life$Year[g[1]]
+# === TIMING: Read CSVs ===
+read_start <- Sys.time()
+cat("Reading CSVs...\n")
+life <- fread(life_table_path)
+country <- fread(country_table_path)
+cat(sprintf("  ✓ CSV reading took: %.2f seconds\n", difftime(Sys.time(), read_start, units="secs")))
+cat(sprintf("  ✓ Life table rows: %d\n", nrow(life)))
+cat(sprintf("  ✓ Country table rows: %d\n", nrow(country)))
 
-  # index N1 where age == 1000
-  # i <- which(life$Age[g] == 1)
-  # N1 <- life$K[g][i[1]]
-  N1 <- 1000 # setting N1 as 1000 er Andy preference
+# === TIMING: Calculations ===
+calc_start <- Sys.time()
+cat("Calculating Ne for each country-year...\n")
 
-  # T from country table for the same ISO3, suffix and year
-  match_row <- which(country$ISO3 == iso & country$ISO3_suffix == suffix & country$Year == year)
-  T <- country$T[match_row[1]]
+# Set N1 constant
+N1 <- 1000
 
-  lx <- life$lx[g]
-  sx <- life$sx[g]
-  dx <- life$dx[g]
-  vx <- life$vx[g]
-#gets life table variables
-  # Ne = (N1 * T) / sum(lx * sx * dx * v(x + 1)^2)
-  numerator <- N1 * T
+# Calculate Ne for each group using data.table
+Ne_results <- life[, {
+  # Get the T value for this group from country table
+  T_val <- country[ISO3 == .BY[[1]] & ISO3_suffix == .BY[[2]] & Year == .BY[[3]], T]
+  
+  # If no match found, return NA
+  if (length(T_val) == 0 || is.na(T_val)) {
+    list(N_sum = NA_real_, Ne = NA_real_, N_ratio = NA_real_)
+  } else {
+    # Calculate N_sum
+    N_sum <- sum(N, na.rm = TRUE)
+    
+    # Calculate Ne numerator
+    numerator <- N1 * T_val
+    
+    # Calculate Ne denominator
+    # Need to exclude last row (no vx+1 for last age)
+    n_rows <- .N
+    if (n_rows > 1) {
+      # Create indices for all but last row
+      i <- 1:(n_rows - 1)
+      
+      # Check which rows have all finite values
+      ok <- is.finite(lx[i]) & is.finite(sx[i]) & is.finite(dx[i]) & is.finite(vx[i + 1])
+      
+      # Calculate terms only for valid rows
+      term <- lx[i][ok] * sx[i][ok] * dx[i][ok] * vx[i + 1][ok]
+      denominator <- sum(term, na.rm = TRUE) + 1
+    } else {
+      denominator <- 1
+    }
+    
+    Ne <- numerator / denominator
+    N_ratio <- Ne / N_sum
+    
+    list(N_sum = N_sum, Ne = Ne, N_ratio = N_ratio)
+  }
+}, by = .(ISO3, ISO3_suffix, Year)]
 
-  # compute terms, keeping only rows where every factor is finite
-  i <- seq_len(length(g) - 1L)
-  ok <- is.finite(lx[i]) & is.finite(sx[i]) & is.finite(dx[i]) & is.finite(vx[i + 1])
-  term <- lx[ok] * sx[ok] * dx[ok] * vx[i + 1][ok]^2
-  denominator <- sum(term, na.rm = TRUE)+1
+cat(sprintf("  ✓ Calculations took: %.2f seconds\n", difftime(Sys.time(), calc_start, units="secs")))
+cat(sprintf("  ✓ Calculated Ne for %d country-years\n", nrow(Ne_results)))
 
-  Ne <- numerator / denominator
+# === TIMING: Merge ===
+merge_start <- Sys.time()
+cat("Merging results with country table...\n")
+out <- merge(country, Ne_results, by = c("ISO3", "ISO3_suffix", "Year"), all = TRUE)
+setorder(out, ISO3, ISO3_suffix, Year)
+cat(sprintf("  ✓ Merge took: %.2f seconds\n", difftime(Sys.time(), merge_start, units="secs")))
 
-  data.frame(
-    ISO3 = iso,
-    ISO3_suffix = suffix,
-    Year = year,
-    Ne = Ne,
-    stringsAsFactors = FALSE
-  )
-})
-Ne_df <- do.call(rbind, ne_list)
+# === TIMING: Write ===
+write_start <- Sys.time()
+cat("Writing output CSV...\n")
+fwrite(out, country_table_path)
+cat(sprintf("  ✓ Writing took: %.2f seconds\n", difftime(Sys.time(), write_start, units="secs")))
 
-# merge into country table
-out <- merge(country, Ne_df, by = c("ISO3", "ISO3_suffix", "Year"), all = TRUE)
-out <- out[order(out$ISO3, out$ISO3_suffix, out$Year), ]
-
-# write csv
-write.csv(out, country_table_path, row.names = FALSE)
+# === TIMING: Total ===
+total_time <- difftime(Sys.time(), script_start, units="secs")
+cat(sprintf("\n=== Ne Pipeline Complete: %.2f seconds total ===\n", total_time))

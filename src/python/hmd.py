@@ -78,8 +78,10 @@ def load_hmd(path) -> pd.DataFrame:
 def format_hmd(df: pd.DataFrame) -> pd.DataFrame:
     # TODO possibly implement formating for age clases
 
-    hmd_variables = ["PopName", "Year", "Age", "lx"] # alter accordingly to variables found in HMD life tables
+    hmd_variables = ["PopName", "Year", "Age", "lx", "ex"] # alter accordingly to variables found in HMD life tables
     df = df[hmd_variables].copy() # filter for selected columns
+    df["ISO3_suffix"] = df["PopName"].str.slice(3).replace("",pd.NA)
+    df["PopName"] = df["PopName"].str.slice(0,3)
     df.rename(columns={"PopName": "ISO3"}, inplace=True) 
     df["Age"] = pd.to_numeric(df["Age"].str.extract(r"(\d+)")[0], errors="coerce") # force age to be numeric, get rid of signs (e.g. +)
 
@@ -89,10 +91,10 @@ def format_hmd(df: pd.DataFrame) -> pd.DataFrame:
 
     # base at Age==0 when present
     base0 = (
-    df.loc[df["Age"] == 0, ["ISO3", "Year", "K"]].rename(columns={"K": "K0"}))
+    df.loc[df["Age"] == 0, ["ISO3", "ISO3_suffix", "Year", "K"]].rename(columns={"K": "K0"}))
 
     # merge K0
-    df = df.merge(base0, on=["ISO3", "Year"], how="left")
+    df = df.merge(base0, on=["ISO3", "ISO3_suffix", "Year"], how="left")
 
     # normalise lx with l0 = 1
     df["lx"] = df["K"] / df["K0"]
